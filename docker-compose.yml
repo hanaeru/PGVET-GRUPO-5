@@ -1,0 +1,380 @@
+services:
+  # -----------------------------------------------------------
+  # CONTENEDOR 1: BASE DE DATOS AUTH
+  # -----------------------------------------------------------
+  auth-db:
+    image: mysql:8.0
+    container_name: auth_db_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: clave_maestra_root
+      MYSQL_DATABASE: auth_db
+      MYSQL_USER: desarrollador
+      MYSQL_PASSWORD: password_seguro_123
+    ports:
+      - "3306:3306"
+    networks:
+      - red_interna_pgvet
+    volumes:
+      - auth_data:/var/lib/mysql
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 2: AUTH-SERVICE
+  # -----------------------------------------------------------
+  auth-service:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: auth_service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-db
+    networks:
+      - red_interna_pgvet
+    command: tail -f /dev/null
+    volumes:
+      - ./codigo-fuente/auth-service:/app
+    working_dir: /app
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 3: BASE DE DATOS USUARIO
+  # -----------------------------------------------------------
+  usuario-db:
+    image: mysql:8.0
+    container_name: usuario_db_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: clave_maestra_root
+      MYSQL_DATABASE: usuario_db
+      MYSQL_USER: desarrollador
+      MYSQL_PASSWORD: password_seguro_123
+    ports:
+      - "3307:3306"
+    networks:
+      - red_interna_pgvet
+    volumes:
+      - usuario_data:/var/lib/mysql
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 4: USUARIO-SERVICE
+  # -----------------------------------------------------------
+  usuario-service:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: usuario_service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - usuario-db
+    networks:
+      - red_interna_pgvet
+    command: tail -f /dev/null
+    volumes:
+      - ./codigo-fuente/usuario-service:/app
+    working_dir: /app
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 5: BASE DE DATOS MASCOTA
+  # -----------------------------------------------------------
+  mascota-db:
+    image: mysql:8.0
+    container_name: mascota_db_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: clave_maestra_root
+      MYSQL_DATABASE: mascota_db
+      MYSQL_USER: desarrollador
+      MYSQL_PASSWORD: password_seguro_123
+    ports:
+      - "3308:3306"
+    networks:
+      - red_interna_pgvet
+    volumes:
+      - mascota_data:/var/lib/mysql
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 6: MASCOTA-SERVICE
+  # -----------------------------------------------------------
+  mascota-service:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: mascota_service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - mascota-db
+    networks:
+      - red_interna_pgvet
+    command: tail -f /dev/null
+    volumes:
+      - ./codigo-fuente/mascota-service:/app
+    working_dir: /app
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 7: BASE DE DATOS CITA
+  # -----------------------------------------------------------
+  cita-db:
+    image: mysql:8.0
+    container_name: cita_db_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: clave_maestra_root
+      MYSQL_DATABASE: cita_db
+      MYSQL_USER: desarrollador
+      MYSQL_PASSWORD: password_seguro_123
+    ports:
+      - "3309:3306"
+    networks:
+      - red_interna_pgvet
+    volumes:
+      - cita_data:/var/lib/mysql
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 8: CITA-SERVICE
+  # -----------------------------------------------------------
+  cita-service:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: cita_service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - cita-db
+      - usuario-service
+      - mascota-service
+    networks:
+      - red_interna_pgvet
+    command: tail -f /dev/null
+    volumes:
+      - ./codigo-fuente/cita-service:/app
+    working_dir: /app
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 9: BASE DE DATOS FICHA CLINICA
+  # -----------------------------------------------------------
+  ficha-clinica-db:
+    image: mysql:8.0
+    container_name: ficha_clinica_db_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: clave_maestra_root
+      MYSQL_DATABASE: ficha_clinica_db
+      MYSQL_USER: desarrollador
+      MYSQL_PASSWORD: password_seguro_123
+    ports:
+      - "3310:3306"
+    networks:
+      - red_interna_pgvet
+    volumes:
+      - ficha_clinica_data:/var/lib/mysql
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 10: FICHA-CLINICA-SERVICE
+  # -----------------------------------------------------------
+  ficha-clinica-service:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: ficha_clinica_service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - ficha-clinica-db
+      - cita-service
+      - usuario-service
+      - mascota-service
+    networks:
+      - red_interna_pgvet
+    command: tail -f /dev/null
+    volumes:
+      - ./codigo-fuente/ficha-clinica-service:/app
+    working_dir: /app
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 11: BASE DE DATOS VACUNA
+  # -----------------------------------------------------------
+  vacuna-db:
+    image: mysql:8.0
+    container_name: vacuna_db_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: clave_maestra_root
+      MYSQL_DATABASE: vacuna_db
+      MYSQL_USER: desarrollador
+      MYSQL_PASSWORD: password_seguro_123
+    ports:
+      - "3311:3306"
+    networks:
+      - red_interna_pgvet
+    volumes:
+      - vacuna_data:/var/lib/mysql
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 12: VACUNA-SERVICE
+  # -----------------------------------------------------------
+  vacuna-service:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: vacuna_service
+    ports:
+      - "8085:8085"
+    depends_on:
+      - vacuna-db
+      - usuario-service
+      - mascota-service
+    networks:
+      - red_interna_pgvet
+    command: tail -f /dev/null
+    volumes:
+      - ./codigo-fuente/vacuna-service:/app
+    working_dir: /app
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 13: BASE DE DATOS RECETA
+  # -----------------------------------------------------------
+  receta-db:
+    image: mysql:8.0
+    container_name: receta_db_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: clave_maestra_root
+      MYSQL_DATABASE: receta_db
+      MYSQL_USER: desarrollador
+      MYSQL_PASSWORD: password_seguro_123
+    ports:
+      - "3312:3306"
+    networks:
+      - red_interna_pgvet
+    volumes:
+      - receta_data:/var/lib/mysql
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 14: RECETA-SERVICE
+  # -----------------------------------------------------------
+  receta-service:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: receta_service
+    ports:
+      - "8086:8086"
+    depends_on:
+      - receta-db
+      - ficha-clinica-service
+      - usuario-service
+      - mascota-service
+    networks:
+      - red_interna_pgvet
+    command: tail -f /dev/null
+    volumes:
+      - ./codigo-fuente/receta-service:/app
+    working_dir: /app
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 15: BASE DE DATOS INVENTARIO
+  # -----------------------------------------------------------
+  inventario-db:
+    image: mysql:8.0
+    container_name: inventario_db_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: clave_maestra_root
+      MYSQL_DATABASE: inventario_db
+      MYSQL_USER: desarrollador
+      MYSQL_PASSWORD: password_seguro_123
+    ports:
+      - "3313:3306"
+    networks:
+      - red_interna_pgvet
+    volumes:
+      - inventario_data:/var/lib/mysql
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 16: INVENTARIO-SERVICE
+  # -----------------------------------------------------------
+  inventario-service:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: inventario_service
+    ports:
+      - "8087:8087"
+    depends_on:
+      - inventario-db
+    networks:
+      - red_interna_pgvet
+    command: tail -f /dev/null
+    volumes:
+      - ./codigo-fuente/inventario-service:/app
+    working_dir: /app
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 17: BASE DE DATOS PAGO
+  # -----------------------------------------------------------
+  pago-db:
+    image: mysql:8.0
+    container_name: pago_db_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: clave_maestra_root
+      MYSQL_DATABASE: pago_db
+      MYSQL_USER: desarrollador
+      MYSQL_PASSWORD: password_seguro_123
+    ports:
+      - "3314:3306"
+    networks:
+      - red_interna_pgvet
+    volumes:
+      - pago_data:/var/lib/mysql
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 18: PAGO-SERVICE
+  # -----------------------------------------------------------
+  pago-service:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: pago_service
+    ports:
+      - "8088:8088"
+    depends_on:
+      - pago-db
+      - cita-service
+      - usuario-service
+    networks:
+      - red_interna_pgvet
+    command: tail -f /dev/null
+    volumes:
+      - ./codigo-fuente/pago-service:/app
+    working_dir: /app
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 19: BASE DE DATOS NOTIFICACION
+  # -----------------------------------------------------------
+  notificacion-db:
+    image: mysql:8.0
+    container_name: notificacion_db_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: clave_maestra_root
+      MYSQL_DATABASE: notificacion_db
+      MYSQL_USER: desarrollador
+      MYSQL_PASSWORD: password_seguro_123
+    ports:
+      - "3315:3306"
+    networks:
+      - red_interna_pgvet
+    volumes:
+      - notificacion_data:/var/lib/mysql
+
+  # -----------------------------------------------------------
+  # CONTENEDOR 20: NOTIFICACION-SERVICE
+  # -----------------------------------------------------------
+  notificacion-service:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: notificacion_service
+    ports:
+      - "8089:8089"
+    depends_on:
+      - notificacion-db
+      - cita-service
+      - vacuna-service
+      - pago-service
+    networks:
+      - red_interna_pgvet
+    command: tail -f /dev/null
+    volumes:
+      - ./codigo-fuente/notificacion-service:/app
+    working_dir: /app
+
+networks:
+  red_interna_pgvet:
+
+volumes:
+  auth_data:
+  usuario_data:
+  mascota_data:
+  cita_data:
+  ficha_clinica_data:
+  vacuna_data:
+  receta_data:
+  inventario_data:
+  pago_data:
+  notificacion_data:

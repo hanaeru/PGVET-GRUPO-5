@@ -1,0 +1,11 @@
+---
+description: Prohibir coautoría de Cursor en commits y PRs
+alwaysApply: true
+---
+
+# Git — solo hanaeru
+
+- Nunca añadir `Co-authored-by`, `Made-with: Cursor` ni ningún trailer de Cursor a commits o PRs.
+- Nunca usar la cuenta `cursoragent` ni el email `cursoragent@cursor.com`.
+- Todos los commits deben quedar únicamente a nombre de **hanaeru** con email `219034926+hanaeru@users.noreply.github.com`.
+- Si haces commit, usa solo `git commit` con mensaje limpio, sin trailers de atribución.
