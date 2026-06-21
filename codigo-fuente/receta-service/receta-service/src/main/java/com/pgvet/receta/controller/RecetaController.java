@@ -5,9 +5,14 @@ import java.util.Optional;
 
 import jakarta.validation.Valid;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +25,7 @@ import com.pgvet.receta.dto.RecetaCreateDTO;
 import com.pgvet.receta.dto.RecetaDTO;
 import com.pgvet.receta.service.RecetaService;
 
-// Controlador REST de recetas
+@Tag(name = "Recetas", description = "Operaciones de emisión y consulta de recetas médicas")
 @RestController
 @RequestMapping("/api/v1/recetas")
 public class RecetaController {
@@ -31,15 +36,23 @@ public class RecetaController {
         this.recetaService = recetaService;
     }
 
-    // GET -> listar recetas
+    @Operation(summary = "Listar recetas",
+               description = "Retorna todas las recetas registradas en el sistema.")
+    @ApiResponse(responseCode = "200", description = "Lista obtenida exitosamente")
     @GetMapping
     public ResponseEntity<List<RecetaDTO>> listar() {
         return ResponseEntity.ok(recetaService.listar());
     }
 
-    // GET -> buscar receta por ID
+    @Operation(summary = "Buscar receta por ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Receta encontrada"),
+        @ApiResponse(responseCode = "404", description = "Receta no encontrada")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<?> buscar(@PathVariable Long id) {
+    public ResponseEntity<?> buscar(
+            @Parameter(description = "ID único de la receta", required = true)
+            @PathVariable Long id) {
 
         Optional<RecetaDTO> receta = recetaService.buscarPorId(id);
 
@@ -52,7 +65,13 @@ public class RecetaController {
                 .body("Receta no encontrada");
     }
 
-    // POST -> crear receta
+    @Operation(summary = "Registrar nueva receta")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Receta creada exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
+        @ApiResponse(responseCode = "404", description = "Referencia externa no encontrada"),
+        @ApiResponse(responseCode = "503", description = "Servicio externo no disponible")
+    })
     @PostMapping
     public ResponseEntity<?> guardar(@Valid @RequestBody RecetaCreateDTO dto) {
 
@@ -63,9 +82,16 @@ public class RecetaController {
                 .body(nuevaReceta);
     }
 
-    // PUT -> actualizar receta
+    @Operation(summary = "Actualizar receta existente")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Actualización exitosa"),
+        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
+        @ApiResponse(responseCode = "404", description = "Receta o referencia externa no encontrada"),
+        @ApiResponse(responseCode = "503", description = "Servicio externo no disponible")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizar(
+            @Parameter(description = "ID único de la receta", required = true)
             @PathVariable Long id,
             @Valid @RequestBody RecetaCreateDTO dto) {
 
@@ -74,9 +100,15 @@ public class RecetaController {
         return ResponseEntity.ok(recetaActualizada);
     }
 
-    // DELETE -> eliminar receta
+    @Operation(summary = "Eliminar receta")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Eliminación exitosa"),
+        @ApiResponse(responseCode = "404", description = "Receta no encontrada")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminar(@PathVariable Long id) {
+    public ResponseEntity<String> eliminar(
+            @Parameter(description = "ID único de la receta", required = true)
+            @PathVariable Long id) {
 
         recetaService.eliminar(id);
 

@@ -1,38 +1,47 @@
 package com.pgvet.mascota.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 
-// DTO de entrada
-// Este objeto recibe el JSON para crear o actualizar mascota
+@Schema(description = "Datos para crear o actualizar una mascota")
 public class MascotaCreateDTO {
 
+    @Schema(description = "Nombre de la mascota", example = "Luna")
     @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
 
+    @Schema(description = "Especie del animal", example = "Perro")
     @NotBlank(message = "La especie es obligatoria")
     private String especie;
 
+    @Schema(description = "Raza del animal", example = "Labrador")
     @NotBlank(message = "La raza es obligatoria")
     private String raza;
 
+    @Schema(description = "Sexo del animal", example = "Hembra")
     @NotBlank(message = "El sexo es obligatorio")
     private String sexo;
 
+    @Schema(description = "Edad en años", example = "3")
     @NotNull(message = "La edad es obligatoria")
     @PositiveOrZero(message = "La edad no puede ser negativa")
     private Integer edad;
 
+    @Schema(description = "Peso en kilogramos", example = "12.5")
     @NotNull(message = "El peso es obligatorio")
     @PositiveOrZero(message = "El peso no puede ser negativo")
     private Double peso;
 
+    @Schema(description = "Color predominante", example = "Negro")
     @NotBlank(message = "El color es obligatorio")
     private String color;
 
+    @Schema(description = "Número de microchip (opcional)", example = "985112004567890")
     private String microchip;
 
+    @Schema(description = "ID del tutor (usuario) propietario", example = "1")
     @NotNull(message = "El tutor es obligatorio")
     private Long tutorId;
 

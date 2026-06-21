@@ -2,41 +2,51 @@ package com.pgvet.ficha.dto;
 
 import java.time.LocalDate;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-// DTO de entrada
-// Este objeto recibe el JSON para crear o actualizar fichas clínicas
+@Schema(description = "Datos para crear o actualizar una ficha clínica")
 public class FichaClinicaCreateDTO {
 
+    @Schema(description = "ID de la mascota atendida", example = "1")
     @NotNull(message = "La mascota es obligatoria")
     private Long mascotaId;
 
+    @Schema(description = "ID del veterinario que atiende", example = "3")
     @NotNull(message = "El veterinario es obligatorio")
     private Long veterinarioId;
 
+    @Schema(description = "ID de la cita asociada", example = "5")
     @NotNull(message = "La cita es obligatoria")
     private Long citaId;
 
+    @Schema(description = "Fecha de la atención clínica", example = "2026-06-20")
     @NotNull(message = "La fecha de atención es obligatoria")
     private LocalDate fechaAtencion;
 
+    @Schema(description = "Síntomas reportados", example = "Decaimiento y falta de apetito")
     @NotBlank(message = "Los síntomas son obligatorios")
     private String sintomas;
 
+    @Schema(description = "Diagnóstico clínico", example = "Gastroenteritis leve")
     @NotBlank(message = "El diagnóstico es obligatorio")
     private String diagnostico;
 
+    @Schema(description = "Tratamiento indicado", example = "Dieta blanda por 5 días")
     @NotBlank(message = "El tratamiento es obligatorio")
     private String tratamiento;
 
+    @Schema(description = "Observaciones adicionales", example = "Control en 7 días")
     private String observaciones;
 
+    @Schema(description = "Peso registrado en kilogramos", example = "12.5")
     @NotNull(message = "El peso es obligatorio")
     @Positive(message = "El peso debe ser mayor a 0")
     private Double peso;
 
+    @Schema(description = "Temperatura corporal en grados Celsius", example = "38.5")
     @NotNull(message = "La temperatura es obligatoria")
     @Positive(message = "La temperatura debe ser mayor a 0")
     private Double temperatura;

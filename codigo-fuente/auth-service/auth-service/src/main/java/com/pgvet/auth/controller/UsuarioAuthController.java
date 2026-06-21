@@ -2,6 +2,12 @@ package com.pgvet.auth.controller;
 
 import jakarta.validation.Valid;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +18,7 @@ import com.pgvet.auth.service.UsuarioAuthService;
 import java.util.List;
 import java.util.Optional;
 
-// Controlador REST de Auth-Service
+@Tag(name = "Auth", description = "Operaciones de autenticación y credenciales")
 @RestController
 @RequestMapping("/api/v1/auth")
 public class UsuarioAuthController {
@@ -23,15 +29,23 @@ public class UsuarioAuthController {
         this.usuarioAuthService = usuarioAuthService;
     }
 
-    // GET -> listar usuarios auth
+    @Operation(summary = "Listar credenciales de auth",
+               description = "Retorna todas las credenciales registradas en auth-service.")
+    @ApiResponse(responseCode = "200", description = "Lista obtenida exitosamente")
     @GetMapping
     public ResponseEntity<List<UsuarioAuthDTO>> listar() {
         return ResponseEntity.ok(usuarioAuthService.listar());
     }
 
-    // GET -> buscar usuario auth por ID
+    @Operation(summary = "Buscar credencial por ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Credencial encontrada"),
+        @ApiResponse(responseCode = "404", description = "Credencial no encontrada")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<?> buscar(@PathVariable Long id) {
+    public ResponseEntity<?> buscar(
+            @Parameter(description = "ID único de la credencial", required = true)
+            @PathVariable Long id) {
 
         Optional<UsuarioAuthDTO> usuario = usuarioAuthService.buscarPorId(id);
 
@@ -44,7 +58,11 @@ public class UsuarioAuthController {
                 .body("Usuario auth no encontrado");
     }
 
-    // POST -> crear usuario auth
+    @Operation(summary = "Registrar credencial de auth")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Credencial creada exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos")
+    })
     @PostMapping
     public ResponseEntity<?> guardar(@Valid @RequestBody UsuarioAuthCreateDTO dto) {
 
@@ -55,9 +73,15 @@ public class UsuarioAuthController {
                 .body(nuevoUsuario);
     }
 
-    // PUT -> actualizar usuario auth
+    @Operation(summary = "Actualizar credencial de auth")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Actualización exitosa"),
+        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
+        @ApiResponse(responseCode = "404", description = "Credencial no encontrada")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizar(
+            @Parameter(description = "ID único de la credencial", required = true)
             @PathVariable Long id,
             @Valid @RequestBody UsuarioAuthCreateDTO dto) {
 
@@ -66,9 +90,15 @@ public class UsuarioAuthController {
         return ResponseEntity.ok(usuarioActualizado);
     }
 
-    // DELETE -> eliminar usuario auth
+    @Operation(summary = "Eliminar credencial de auth")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Eliminación exitosa"),
+        @ApiResponse(responseCode = "404", description = "Credencial no encontrada")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminar(@PathVariable Long id) {
+    public ResponseEntity<String> eliminar(
+            @Parameter(description = "ID único de la credencial", required = true)
+            @PathVariable Long id) {
 
         usuarioAuthService.eliminar(id);
 

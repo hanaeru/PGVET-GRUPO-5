@@ -1,4 +1,4 @@
-package com.pgvet.usuario.config;
+package com.pgvet.cita.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -12,8 +12,8 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("API Usuario Service")
+                        .title("API Cita Service")
                         .version("1.0")
-                        .description("Gestión de usuarios del sistema veterinario"));
+                        .description("Agendamiento y consulta de citas veterinarias"));
     }
 }

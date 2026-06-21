@@ -2,7 +2,6 @@ package com.pgvet.usuario.controller;
 
 import jakarta.validation.Valid;
 
-// Imports de Swagger (agregar estos)
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,8 +18,6 @@ import com.pgvet.usuario.service.UsuarioService;
 import java.util.List;
 import java.util.Optional;
 
-// Controlador REST de usuarios
-// ↓ NUEVO: agrupa los endpoints bajo el nombre "Mascotas" en Swagger UI
 @Tag(name = "Usuarios", description = "Operaciones de gestión de usuarios")
 @RestController
 @RequestMapping("/api/v1/usuarios")
@@ -32,8 +29,7 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    // GET -> listar usuarios
-    @Operation(summary = "Listar todas los usuarios",
+    @Operation(summary = "Listar usuarios",
                description = "Retorna la lista completa de usuarios registrados en el sistema.")
     @ApiResponse(responseCode = "200", description = "Lista obtenida exitosamente")
     @GetMapping
@@ -41,17 +37,15 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.listar());
     }
 
-    // GET -> buscar usuario por ID
-    //Swagger
-      @Operation(summary = "Buscar usuario por ID")
+    @Operation(summary = "Buscar usuario por ID")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Usuario encontrado"),
         @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
     @GetMapping("/{id}")
     public ResponseEntity<?> buscar(
-         @Parameter(description = "ID único del usuario", required = true)
-        @PathVariable Long id) {
+            @Parameter(description = "ID único del usuario", required = true)
+            @PathVariable Long id) {
 
         Optional<UsuarioDTO> usuario = usuarioService.buscarPorId(id);
 
@@ -64,10 +58,11 @@ public class UsuarioController {
                 .body("Usuario no encontrado");
     }
 
-    // POST -> crear usuario
-    //Swagger
     @Operation(summary = "Registrar nuevo usuario")
-    @ApiResponse(responseCode = "201", description = "Usuario creado exitosamente")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Usuario creado exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos")
+    })
     @PostMapping
     public ResponseEntity<?> guardar(@Valid @RequestBody UsuarioCreateDTO dto) {
 
@@ -78,15 +73,15 @@ public class UsuarioController {
                 .body(nuevoUsuario);
     }
 
-    // PUT -> actualizar usuario
-    //Swagger
-     @Operation(summary = "Actualizar usuario existente")
+    @Operation(summary = "Actualizar usuario existente")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Actualización exitosa"),
+        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
         @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizar(
+            @Parameter(description = "ID único del usuario", required = true)
             @PathVariable Long id,
             @Valid @RequestBody UsuarioCreateDTO dto) {
 
@@ -95,15 +90,15 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioActualizado);
     }
 
-    // DELETE -> eliminar usuario
-    //SWAGGER
-     @Operation(summary = "Eliminar usuario")
+    @Operation(summary = "Eliminar usuario")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Eliminación exitosa"),
         @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminar(@PathVariable Long id) {
+    public ResponseEntity<String> eliminar(
+            @Parameter(description = "ID único del usuario", required = true)
+            @PathVariable Long id) {
 
         usuarioService.eliminar(id);
 

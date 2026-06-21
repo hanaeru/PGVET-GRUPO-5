@@ -1,40 +1,50 @@
 package com.pgvet.usuario.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-// DTO de entrada
-// Este objeto recibe el JSON para crear o actualizar usuario
+@Schema(description = "Datos para crear o actualizar un usuario del sistema")
 public class UsuarioCreateDTO {
 
+    @Schema(description = "RUT del usuario", example = "12345678-9")
     @NotBlank(message = "El RUT es obligatorio")
     private String rut;
 
+    @Schema(description = "Nombre del usuario", example = "María")
     @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
 
+    @Schema(description = "Apellido del usuario", example = "González")
     @NotBlank(message = "El apellido es obligatorio")
     private String apellido;
 
+    @Schema(description = "Correo electrónico", example = "maria.gonzalez@correo.cl")
     @NotBlank(message = "El correo es obligatorio")
     @Email(message = "El correo no tiene formato válido")
     private String correo;
 
+    @Schema(description = "Teléfono de contacto", example = "+56912345678")
     @NotBlank(message = "El teléfono es obligatorio")
     private String telefono;
 
+    @Schema(description = "Dirección del domicilio", example = "Av. Principal 123")
     @NotBlank(message = "La dirección es obligatoria")
     private String direccion;
 
+    @Schema(description = "Comuna de residencia", example = "Santiago")
     @NotBlank(message = "La comuna es obligatoria")
     private String comuna;
 
+    @Schema(description = "Región de residencia", example = "Metropolitana")
     @NotBlank(message = "La región es obligatoria")
     private String region;
 
+    @Schema(description = "Rol en el sistema", example = "VETERINARIO")
     @NotBlank(message = "El rol es obligatorio")
     private String rol;
 
+    @Schema(description = "Especialidad veterinaria (solo para rol VETERINARIO)", example = "Cirugía")
     private String especialidad;
 
     public UsuarioCreateDTO() {

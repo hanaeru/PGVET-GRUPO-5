@@ -5,9 +5,14 @@ import java.util.Optional;
 
 import jakarta.validation.Valid;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,28 +25,36 @@ import com.pgvet.inventario.dto.ProductoInventarioCreateDTO;
 import com.pgvet.inventario.dto.ProductoInventarioDTO;
 import com.pgvet.inventario.service.ProductoInventarioService;
 
-// Controlador REST de inventario
+@Tag(name = "Inventario", description = "Operaciones de gestión de productos e inventario")
 @RestController
 @RequestMapping("/api/v1/inventario")
 public class ProductoInventarioController {
 
-    private final ProductoInventarioService productoService;
+    private final ProductoInventarioService productoInventarioService;
 
-    public ProductoInventarioController(ProductoInventarioService productoService) {
-        this.productoService = productoService;
+    public ProductoInventarioController(ProductoInventarioService productoInventarioService) {
+        this.productoInventarioService = productoInventarioService;
     }
 
-    // GET -> listar productos
+    @Operation(summary = "Listar productos",
+               description = "Retorna todos los productos del inventario.")
+    @ApiResponse(responseCode = "200", description = "Lista obtenida exitosamente")
     @GetMapping
     public ResponseEntity<List<ProductoInventarioDTO>> listar() {
-        return ResponseEntity.ok(productoService.listar());
+        return ResponseEntity.ok(productoInventarioService.listar());
     }
 
-    // GET -> buscar producto por ID
+    @Operation(summary = "Buscar producto por ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Producto encontrado"),
+        @ApiResponse(responseCode = "404", description = "Producto no encontrado")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<?> buscar(@PathVariable Long id) {
+    public ResponseEntity<?> buscar(
+            @Parameter(description = "ID único del producto", required = true)
+            @PathVariable Long id) {
 
-        Optional<ProductoInventarioDTO> producto = productoService.buscarPorId(id);
+        Optional<ProductoInventarioDTO> producto = productoInventarioService.buscarPorId(id);
 
         if (producto.isPresent()) {
             return ResponseEntity.ok(producto.get());
@@ -52,33 +65,49 @@ public class ProductoInventarioController {
                 .body("Producto no encontrado");
     }
 
-    // POST -> crear producto
+    @Operation(summary = "Registrar nuevo producto")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Producto creado exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos")
+    })
     @PostMapping
     public ResponseEntity<?> guardar(@Valid @RequestBody ProductoInventarioCreateDTO dto) {
 
-        ProductoInventarioDTO nuevoProducto = productoService.guardar(dto);
+        ProductoInventarioDTO nuevoProducto = productoInventarioService.guardar(dto);
 
         return ResponseEntity
                 .status(201)
                 .body(nuevoProducto);
     }
 
-    // PUT -> actualizar producto
+    @Operation(summary = "Actualizar producto existente")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Actualización exitosa"),
+        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
+        @ApiResponse(responseCode = "404", description = "Producto no encontrado")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizar(
+            @Parameter(description = "ID único del producto", required = true)
             @PathVariable Long id,
             @Valid @RequestBody ProductoInventarioCreateDTO dto) {
 
-        ProductoInventarioDTO productoActualizado = productoService.actualizar(id, dto);
+        ProductoInventarioDTO productoActualizado = productoInventarioService.actualizar(id, dto);
 
         return ResponseEntity.ok(productoActualizado);
     }
 
-    // DELETE -> eliminar producto
+    @Operation(summary = "Eliminar producto")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Eliminación exitosa"),
+        @ApiResponse(responseCode = "404", description = "Producto no encontrado")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminar(@PathVariable Long id) {
+    public ResponseEntity<String> eliminar(
+            @Parameter(description = "ID único del producto", required = true)
+            @PathVariable Long id) {
 
-        productoService.eliminar(id);
+        productoInventarioService.eliminar(id);
 
         return ResponseEntity.ok("Producto eliminado correctamente");
     }
