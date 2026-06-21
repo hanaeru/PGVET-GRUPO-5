@@ -1,0 +1,55 @@
+# Puerto público único del sistema: el cliente solo habla con el Gateway en 8080.
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ms-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          # Cada ruta usa lb://NOMBRE-EUREKA para buscar instancias registradas.
+          # El nombre debe coincidir EXACTAMENTE con spring.application.name de cada microservicio.
+          routes:
+            - id: auth-route
+              uri: lb://MS-AUTH
+              predicates:
+                - Path=/api/v1/auth/**
+
+            - id: usuario-route
+              uri: lb://MS-USUARIO
+              predicates:
+                - Path=/api/v1/usuarios/**
+
+            - id: mascota-route
+              uri: lb://MS-MASCOTA
+              predicates:
+                - Path=/api/v1/mascotas/**
+
+            - id: cita-route
+              uri: lb://MS-CITA
+              predicates:
+                - Path=/api/v1/citas/**
+
+            - id: notificacion-route
+              uri: lb://MS-NOTIFICACION
+              predicates:
+                - Path=/api/v1/notificaciones/**
+
+            - id: ficha-route
+              uri: lb://MS-FICHA
+              predicates:
+                # Ruta real del FichaClinicaController: /api/v1/fichas-clinicas
+                - Path=/api/v1/fichas-clinicas/**
+
+# El Gateway también es cliente Eureka para descubrir MS-AUTH, MS-USUARIO, etc.
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+logging:
+  level:
+    # Ayuda a ver qué ruta lb:// se selecciona en cada petición.
+    org.springframework.cloud.gateway: DEBUG

@@ -24,7 +24,7 @@ services:
     image: maven:3.9-eclipse-temurin-21
     container_name: auth_service
     ports:
-      - "8080:8080"
+      - "8090:8090"
     depends_on:
       - auth-db
     networks:

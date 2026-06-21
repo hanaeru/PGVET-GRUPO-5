@@ -17,7 +17,7 @@ PGVet permite gestionar información veterinaria de forma distribuida: usuarios,
 | Tecnología | Uso en el proyecto |
 |------------|-------------------|
 | Java 21 | Lenguaje principal |
-| Spring Boot 4 | Framework de cada microservicio |
+| Spring Boot 3.3 / 4.0 | Framework de cada microservicio (ver nota de versiones) |
 | Spring Web | API REST (controllers) |
 | Spring Data JPA | Persistencia con MySQL |
 | Validation | Validación de DTOs de entrada |
@@ -25,27 +25,35 @@ PGVet permite gestionar información veterinaria de forma distribuida: usuarios,
 | MySQL 8 | Base de datos por microservicio |
 | Docker Compose | Orquestación de contenedores en desarrollo |
 | OpenFeign | Llamadas HTTP entre microservicios |
+| Spring Cloud Netflix Eureka | Registro de servicios (ms-eureka) |
+| Spring Cloud Gateway | Entrada única HTTP (ms-gateway, puerto 8080) |
+| springdoc OpenAPI 2.6.0 | Documentación Swagger UI por microservicio |
 | SLF4J | Registro de logs en capa service |
 | Postman | Pruebas manuales de APIs e integración |
+
+> **Versiones:** auth, usuario, notificacion y ficha-clinica usan Spring Boot **4.0.6**; mascota y cita usan **3.3.5**. ms-eureka y ms-gateway usan Boot **4.0.6** + Spring Cloud **2025.1.2**.
 
 ---
 
 ## Estructura del repositorio
 
 ```
-PGVET-FULLSTACK-GRUPO-5/
-├── docker-compose.yml          # 20 contenedores (10 MySQL + 10 servicios)
+PGVET-GRUPO-5/
+├── docker-compose.yml
+├── TESTING_PLAN.md             # Pruebas unitarias (103 tests, 6 microservicios)
 ├── codigo-fuente/
+│   ├── ms-eureka/              # Servidor Eureka (8761)
+│   ├── ms-gateway/             # API Gateway (8080)
 │   ├── auth-service/
 │   ├── usuario-service/
 │   ├── mascota-service/
 │   ├── cita-service/
 │   ├── ficha-clinica-service/
+│   ├── notificacion-service/
 │   ├── vacuna-service/
 │   ├── receta-service/
 │   ├── inventario-service/
-│   ├── pago-service/
-│   └── notificacion-service/
+│   └── pago-service/
 └── README.md
 ```
 
@@ -53,20 +61,49 @@ PGVET-FULLSTACK-GRUPO-5/
 
 ---
 
-## Microservicios y puertos
+## Microservicios e infraestructura
+
+### Infraestructura Gateway / Eureka
+
+| Servicio | Carpeta | Puerto | URL / nombre Eureka |
+|----------|---------|--------|---------------------|
+| Eureka Server | `codigo-fuente/ms-eureka` | **8761** | http://localhost:8761 |
+| API Gateway | `codigo-fuente/ms-gateway` | **8080** | http://localhost:8080 — registrado como `MS-GATEWAY` |
+
+El cliente externo debe usar el **Gateway (8080)**. Los microservicios se registran en Eureka con nombre lógico (`MS-USUARIO`, etc.).
+
+### Microservicios principales (con Eureka y Gateway)
+
+| Microservicio | Puerto | Eureka name | Base path API | Swagger UI |
+|---------------|--------|-------------|---------------|------------|
+| auth-service | **8090** | `MS-AUTH` | `/api/v1/auth` | http://localhost:8090/doc/swagger-ui.html |
+| usuario-service | 8081 | `MS-USUARIO` | `/api/v1/usuarios` | http://localhost:8081/doc/swagger-ui.html |
+| mascota-service | 8082 | `MS-MASCOTA` | `/api/v1/mascotas` | http://localhost:8082/doc/swagger-ui.html |
+| cita-service | 8083 | `MS-CITA` | `/api/v1/citas` | http://localhost:8083/doc/swagger-ui.html |
+| ficha-clinica-service | 8084 | `MS-FICHA` | `/api/v1/fichas-clinicas` | http://localhost:8084/doc/swagger-ui.html |
+| notificacion-service | 8089 | `MS-NOTIFICACION` | `/api/v1/notificaciones` | http://localhost:8089/doc/swagger-ui.html |
+
+> **Auth en 8090:** el Gateway ocupa el puerto 8080 como entrada pública. Los paths `/api/v1/auth/**` no cambiaron.
+
+### Acceso vía Gateway (misma ruta, puerto 8080)
+
+| Recurso | Ejemplo |
+|---------|---------|
+| Usuarios | http://localhost:8080/api/v1/usuarios |
+| Mascotas | http://localhost:8080/api/v1/mascotas |
+| Citas | http://localhost:8080/api/v1/citas |
+| Auth | http://localhost:8080/api/v1/auth |
+| Notificaciones | http://localhost:8080/api/v1/notificaciones |
+| Fichas clínicas | http://localhost:8080/api/v1/fichas-clinicas |
+
+### Otros microservicios
 
 | Microservicio | Puerto HTTP | Base path API |
 |---------------|-------------|---------------|
-| auth-service | 8080 | `/api/v1/auth` |
-| usuario-service | 8081 | `/api/v1/usuarios` |
-| mascota-service | 8082 | `/api/v1/mascotas` |
-| cita-service | 8083 | `/api/v1/citas` |
-| ficha-clinica-service | 8084 | `/api/v1/fichas-clinicas` |
 | vacuna-service | 8085 | `/api/v1/vacunas` |
 | receta-service | 8086 | `/api/v1/recetas` |
 | inventario-service | 8087 | `/api/v1/inventario` |
 | pago-service | 8088 | `/api/v1/pagos` |
-| notificacion-service | 8089 | `/api/v1/notificaciones` |
 
 Los servicios **auth-service**, **usuario-service** e **inventario-service** no consumen otros microservicios por Feign. El resto valida referencias externas antes de crear o actualizar registros.
 
@@ -234,6 +271,69 @@ Al intentar crear una mascota o una cita que valide tutor/usuario, la API debe r
 
 ```bash
 docker start usuario_service
+```
+
+---
+
+## Pruebas unitarias
+
+Seis microservicios con **103 tests** en cuatro capas (modelo, servicio, controlador, repositorio) y un test de arranque de contexto por servicio. Ver [TESTING_PLAN.md](TESTING_PLAN.md) para el detalle por capa.
+
+```powershell
+# Ejemplo: usuario-service (18 tests)
+cd codigo-fuente\usuario-service\usuario-service
+.\mvnw.cmd test
+```
+
+Resultado esperado: `BUILD SUCCESS`, `Failures: 0`, `Errors: 0`.
+
+Para ejecutar todos los microservicios con pruebas:
+
+```powershell
+cd codigo-fuente\auth-service\auth-service; .\mvnw.cmd test
+cd codigo-fuente\usuario-service\usuario-service; .\mvnw.cmd test
+cd codigo-fuente\mascota-service\mascota-service; .\mvnw.cmd test
+cd codigo-fuente\cita-service; .\mvnw.cmd test
+cd codigo-fuente\notificacion-service\notificacion-service; .\mvnw.cmd test
+cd codigo-fuente\ficha-clinica-service\ficha-clinica-service; .\mvnw.cmd test
+```
+
+---
+
+## API Gateway + Eureka
+
+El **Eureka Server** (`ms-eureka`, puerto 8761) registra los microservicios por nombre lógico. El **API Gateway** (`ms-gateway`, puerto 8080) expone una única entrada HTTP y enruta con `lb://` hacia cada servicio registrado.
+
+Rutas configuradas en el Gateway:
+
+| Path | Servicio Eureka |
+|------|-----------------|
+| `/api/v1/auth/**` | `MS-AUTH` |
+| `/api/v1/usuarios/**` | `MS-USUARIO` |
+| `/api/v1/mascotas/**` | `MS-MASCOTA` |
+| `/api/v1/citas/**` | `MS-CITA` |
+| `/api/v1/notificaciones/**` | `MS-NOTIFICACION` |
+| `/api/v1/fichas-clinicas/**` | `MS-FICHA` |
+
+**Orden de arranque** (con MySQL vía Docker):
+
+1. `docker compose up -d`
+2. ms-eureka (8761)
+3. Los 6 microservicios
+4. ms-gateway (8080) — al final, cuando Eureka ya tenga instancias registradas
+
+```powershell
+cd codigo-fuente\ms-eureka
+.\mvnw.cmd spring-boot:run
+
+cd codigo-fuente\ms-gateway
+.\mvnw.cmd spring-boot:run
+```
+
+Verificar el dashboard Eureka en http://localhost:8761 y probar, por ejemplo:
+
+```bash
+curl http://localhost:8080/api/v1/usuarios
 ```
 
 ---

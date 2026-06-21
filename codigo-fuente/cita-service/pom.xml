@@ -57,6 +57,12 @@
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
 
+        <!-- Registro en Eureka para que el Gateway lo encuentre como MS-CITA -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
         <!-- Swagger UI / OpenAPI -->
         <dependency>
             <groupId>org.springdoc</groupId>
